@@ -31,11 +31,11 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
         [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> Index()
         {
+            // lấy toàn bộ user trừ id của người đăng nhập
             var claimsIdentity = (ClaimsIdentity) User.Identity;
             var claims = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
             //dùng để tránh trường hợp xóa nhầm role của mình
-            // lấy toàn bộ user trừ id của người đăng nhập
             var userList = _db.ApplicationUsers.Where(u => u.Id != claims.Value); 
 
             foreach (var user in userList)
@@ -77,31 +77,46 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
         }
 
        
+        [HttpGet]
+        public async Task<IActionResult> Update(String id)
+        {
+            if (id != null)
+            {
+                UserVM userVm = new UserVM();
+                var user = _db.ApplicationUsers.Find(id);
+                userVm.ApplicationUser = user;
+                // hiển thị role cũ tránh khi ấn submit k chọn role
+                var roleTemp = await _userManager.GetRolesAsync(user);
+                userVm.Role = roleTemp.First();
+                userVm.Rolelist = _roleManager.Roles.Select(x => x.Name).Select(i => new SelectListItem()
+                {
+                    Text = i,
+                    Value = i
+                });
+                return View(userVm);
+            }
+            return NotFound();
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> Update(UserVM userVm)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = _db.ApplicationUsers.Find(userVm.ApplicationUser.Id);
+                user.FullName = userVm.ApplicationUser.FullName;
+                user.Address = userVm.ApplicationUser.Address;
 
-        // public async Task<IActionResult> Update(String id)
-        // {
-        //     if (id == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     var userTemp = await _userManager.FindByIdAsync(id);
-        //     var roleTemp = await _userManager.GetRolesAsync(userTemp);
-        //     if (roleTemp.First() == "Admin" || roleTemp.First() == "Staff")
-        //     {
-        //         return RedirectToAction("EditAdmin", "Users", new {id = id});
-        //     }
-        //     if (roleTemp.First() =="Trainer")
-        //     {
-        //         return RedirectToAction("EditTrainer", "Users", new {id = id});
-        //     }
-        //     if (roleTemp.First() =="Trainee")
-        //     {
-        //         return RedirectToAction("EditTrainee", "Users", new {id = id});
-        //     }
-        //
-        //     return NoContent();
-        // }
+                var oldRole = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRoleAsync(user, oldRole.First());
+                await _userManager.AddToRoleAsync(user, userVm.Role);
+
+                _db.ApplicationUsers.Update(user);
+                _db.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(userVm);
+        }
 
         // [HttpGet]
         // public async Task<IActionResult> EditAdmin(String id)
@@ -121,7 +136,7 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
         //     }
         //     return NotFound();
         // }
-        
+        //
         // [HttpPost]
         // public async Task<IActionResult> EditAdmin(UserVM userVm)
         // {

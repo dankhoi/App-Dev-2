@@ -8,7 +8,10 @@ namespace App_Dev_2.Models
     {
         [Required]
         public string FullName { get; set; }
-        [NotMapped] 
+        public string Address { get; set; }
+        [NotMapped]
         public string Role { get; set; }
+
+        
     }
 }
