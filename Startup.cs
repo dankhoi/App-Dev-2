@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using App_Dev_2.Areas.Authenticated.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
@@ -10,6 +11,10 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using App_Dev_2.Data;
 using App_Dev_2.DbInitializer;
+using App_Dev_2.Models;
+using App_Dev_2.SendMailService;
+using App_Dev_2.Utility;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -52,6 +57,14 @@ namespace App_Dev_2
             });
             
             services.AddScoped<IDbInitializer, DbInitializer.DbInitializer>();
+            
+            // map ping mailsettings trong apsettings.js với class mailsettings
+            services.AddOptions ();                                         // Kích hoạt Options
+            var mailsettings = Configuration.GetSection ("MailSettings");  // đọc config
+            services.Configure<MailSettings> (mailsettings);
+            
+            
+            services.AddTransient<ISendMailService, SendMailService.SendMailService>();
         }
         
         

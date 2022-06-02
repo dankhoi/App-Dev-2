@@ -45,6 +45,7 @@
                     {
                         <a asp-controller="UsersManagement" asp-action="LockUnLock" asp-route-id="@obj.Id" class="btn btn-warning">UnLock</a>
                     }
+                    <a asp-controller="UsersManagement" asp-action="Update" asp-route-id="@obj.Id" class="btn btn-warning">Update</a>
                     <a asp-controller="UsersManagement" asp-action="ConfirmEmail" asp-route-id="@obj.Id" class="btn btn-success">Reset Password</a>
                 </td>
             </tr>
