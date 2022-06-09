@@ -56,6 +56,23 @@ namespace App_Dev_2
                 options.Cookie.IsEssential = true;
             });
             
+            services.AddAuthentication()
+                .AddGoogle(googleOptions =>
+                {
+                    IConfigurationSection googleAuthNSection= Configuration.GetSection("Authentication:Google");
+                    googleOptions.ClientId = "294440161-ug5ba9hdp6mi5g4i7s9i7k5iok6oe99s.apps.googleusercontent.com";
+                    googleOptions.ClientSecret = "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";
+                })
+                .AddFacebook(facebookOptions => {
+                    // Đọc cấu hình
+                    IConfigurationSection facebookAuthNSection = Configuration.GetSection("Authentication:Facebook");
+                    facebookOptions.AppId = "1852069598516528";
+                    facebookOptions.AppSecret = "9ed6f5c918d2be36ae028c60aff917c5";
+                    // Thiết lập đường dẫn Facebook chuyển hướng đến
+                    // facebookOptions.CallbackPath = "/dang-nhap-tu-facebook";
+                    
+                });
+            
             services.AddScoped<IDbInitializer, DbInitializer.DbInitializer>();
             
             // map ping mailsettings trong apsettings.js với class mailsettings

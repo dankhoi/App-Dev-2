@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using App_Dev_2.Data;
@@ -8,6 +10,7 @@ using App_Dev_2.Models;
 using App_Dev_2.Utility;
 using Humanizer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +70,16 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
             }
             return View(category);
         }
+
+        // public async Task<List<IActionResult>> Import(IFormFile file)
+        // {
+        //     var list = new List<Category>();
+        //     using (var stream = new MemoryStream())
+        //     {
+        //         
+        //     }
+        //     return View();
+        // }
 
         public IActionResult Delete(int id)
         {
