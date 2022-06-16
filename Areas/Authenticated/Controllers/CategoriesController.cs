@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace App_Dev_2.Areas.Authenticated.Controllers
 {
     [Area("Authenticated")]
-    [Authorize(Roles = SD.Role_Customer)]
+    [Authorize(Roles = SD.Role_StoreOwner)]
     public class CategoriesController : Controller
     {
        

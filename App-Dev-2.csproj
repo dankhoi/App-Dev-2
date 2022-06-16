@@ -26,6 +26,7 @@
       <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
       <_ContentIncludedByDefault Remove="Views\Home\Privacy.cshtml" />
       <_ContentIncludedByDefault Remove="Areas\Authenticated\Views\SendEmail\SendEmail.cshtml" />
+      <_ContentIncludedByDefault Remove="Areas\Authenticated\Pages\Cart\Index.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
