@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 using App_Dev_2.Data;
 using App_Dev_2.Models;
 using App_Dev_2.Utility;
 using App_Dev_2.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using OfficeOpenXml;
 
 namespace App_Dev_2.Areas.Authenticated.Controllers
 {
@@ -17,21 +21,22 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
     [Authorize(Roles = SD.Role_StoreOwner)]
     public class ProductsController : Controller
     {
-         private readonly ApplicationDbContext _db;
-         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _hostEnvironment;
+
         public ProductsController(ApplicationDbContext db, IWebHostEnvironment hostEnvironment)
         {
             _db = db;
             _hostEnvironment = hostEnvironment;
         }
-        
+
         public IActionResult Index()
         {
             var listAllData = _db.Products.ToList();
             ViewData["Message"] = TempData["Message"];
             return View(listAllData);
         }
-        
+
         [HttpGet]
         public IActionResult Upsert(int? id)
         {
@@ -40,17 +45,17 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
                 Product = new Product(),
                 CategoryList = categoriesSelectListItems()
             };
-            
+
             if (id == null)
             {
                 return View(productVm);
             }
 
             productVm.Product = _db.Products.Find(id);
-            
+
             return View(productVm);
         }
-        
+
         [HttpPost]
         public IActionResult Upsert(ProductVM productVm)
         {
@@ -90,6 +95,7 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
                         productVm.Product.ImageUrl = objFromDb.ImageUrl;
                     }
                 }
+
                 if (productVm.Product.Id == 0)
                 {
                     _db.Products.Add(productVm.Product);
@@ -108,6 +114,42 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
             productVm.CategoryList = categoriesSelectListItems();
 
             return View(productVm);
+        }
+
+        [HttpGet]
+        public IActionResult Import()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Import(IFormFile file)
+        {
+            var list = new List<Product>();
+            using (var stream = new MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                using (var package = new ExcelPackage(stream))
+                {
+                    ExcelWorksheet worksheet = package.Workbook.Worksheets[1];
+                    var countRows = worksheet.Dimension.Rows;
+                    for (int row = 2; row <= countRows; row++)
+                    {
+                        list.Add(new Product()
+                        {
+                            Title = worksheet.Cells[row, 1].Value.ToString(),
+                            Description = worksheet.Cells[row, 2].Value.ToString(),
+                            Author = worksheet.Cells[row, 3].Value.ToString(),
+                            NoPage = worksheet.Cells[row, 4].Value.ToString(),
+                            Price = Convert.ToInt32(worksheet.Cells[row, 5].Value.ToString()),
+                            CategoryId = _db.Categories.FirstOrDefault(c => c.Name == worksheet.Cells[row, 6].Value.ToString()).Id
+                        });
+                    }
+                }
+            }
+            _db.Products.AddRange(list);
+            _db.SaveChanges();
+           return RedirectToAction(nameof(Index));
         }
 
         [NonAction]
@@ -129,6 +171,7 @@ namespace App_Dev_2.Areas.Authenticated.Controllers
             {
                 ViewData["Message"] = "Error: Id input null";
             }
+
             var productNeedToDelete = _db.Products.Find(id);
             _db.Products.Remove(productNeedToDelete);
             _db.SaveChanges();
