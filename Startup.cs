@@ -15,6 +15,7 @@ using App_Dev_2.Models;
 using App_Dev_2.SendMailService;
 using App_Dev_2.Utility;
 using Microsoft.AspNetCore.Http;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -82,6 +83,13 @@ namespace App_Dev_2
             
             
             services.AddTransient<ISendMailService, SendMailService.SendMailService>();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            services.AddHttpContextAccessor();
         }
         
         
@@ -105,7 +113,7 @@ namespace App_Dev_2
             app.UseStaticFiles();
 
             app.UseRouting();
-            
+            app.UseSession();
             app.UseAuthentication();
             app.UseAuthorization();
             
