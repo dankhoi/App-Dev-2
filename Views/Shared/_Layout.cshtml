@@ -31,6 +31,9 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="Authenticated" asp-controller="UsersManagement" asp-action="Index">Users Management</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="Authenticated" asp-controller="OrderOverViews" asp-action="Index">OrderOverViews</a>
+                    </li>
                     @if (HttpContextAccessor.HttpContext.Session.GetInt32(SD.ssShoppingCart) != null)
                     {
                         <li style="color: white">
